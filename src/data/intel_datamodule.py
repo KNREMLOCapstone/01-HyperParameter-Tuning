@@ -29,7 +29,48 @@ from torchvision.datasets.utils import extract_archive
 from sklearn.model_selection import train_test_split
 from collections import Counter
 
+def write_dataset(image_paths, output_dir):
+    for img_path in image_paths:
+        Path(output_dir / img_path.parent.stem).mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(img_path, output_dir / img_path.parent.stem / img_path.name)
 
+def generate_dataset():
+    dataset_extracted = Path("data/intel-image-classification")
+    dataset_extracted.mkdir(parents=True, exist_ok=True)
+
+    # split dataset and save to their directories
+    print(f":: Extracting Zip {dataset_zip} to {dataset_extracted}")
+    extract_archive(from_path=dataset_zip, to_path=dataset_extracted)
+
+    ds = list((dataset_extracted / "seg_train" / "seg_train").glob("*/*"))
+    ds += list((dataset_extracted / "seg_test" / "seg_test").glob("*/*"))
+    d_pred = list((dataset_extracted / "seg_pred" / "seg_pred").glob("*/"))
+
+    labels = [x.parent.stem for x in ds]
+    print(":: Dataset Class Counts: ", Counter(labels))
+
+    d_train, d_test = train_test_split(ds, test_size=0.2, stratify=labels)
+    d_test, d_val = train_test_split(
+        d_test, test_size=0.5, stratify=[x.parent.stem for x in d_test]
+    )
+
+    print("\t:: Train Dataset Class Counts: ", Counter(x.parent.stem for x in d_train))
+    print("\t:: Test Dataset Class Counts: ", Counter(x.parent.stem for x in d_test))
+    print("\t:: Val Dataset Class Counts: ", Counter(x.parent.stem for x in d_val))
+    print("\t:: Total validation images", len(d_pred))
+    dataset_path=Path("data")
+    for path in ["train", "test", "val","preds"]:
+        output_dir = dataset_path / path
+        print(f"\t:: Creating Directory {output_dir}")
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+    print(":: Writing Datasets")
+    write_dataset(d_train, Path("data/train"))
+    write_dataset(d_test, Path("data/test"))
+    write_dataset(d_val, Path("data/val"))
+    write_dataset(d_pred, Path("data/preds"))
+
+dataset_zip = Path("data/intel.zip")
 class IntelImgClfDataModule(LightningDataModule):
     def __init__(
         self,
@@ -58,6 +99,8 @@ class IntelImgClfDataModule(LightningDataModule):
         self.data_train: Optional[Dataset] = None
         self.data_test: Optional[Dataset] = None
         self.data_val: Optional[Dataset] = None
+        generate_dataset()
+
 
     @property
     def num_classes(self):
@@ -164,48 +207,5 @@ def train_and_evaluate(model, datamodule, sm_training_env, output_dir):
         json.dump(acc_per_class, outfile)
     return trainer
 
-dataset_zip = Path("data/intel.zip")
-def write_dataset(image_paths, output_dir):
-    for img_path in image_paths:
-        Path(output_dir / img_path.parent.stem).mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(img_path, output_dir / img_path.parent.stem / img_path.name)
-
-def generate_dataset():
-    dataset_extracted = Path("data/intel-image-classification")
-    dataset_extracted.mkdir(parents=True, exist_ok=True)
-
-    # split dataset and save to their directories
-    print(f":: Extracting Zip {dataset_zip} to {dataset_extracted}")
-    extract_archive(from_path=dataset_zip, to_path=dataset_extracted)
-
-    ds = list((dataset_extracted / "seg_train" / "seg_train").glob("*/*"))
-    ds += list((dataset_extracted / "seg_test" / "seg_test").glob("*/*"))
-    d_pred = list((dataset_extracted / "seg_pred" / "seg_pred").glob("*/"))
-
-    labels = [x.parent.stem for x in ds]
-    print(":: Dataset Class Counts: ", Counter(labels))
-
-    d_train, d_test = train_test_split(ds, test_size=0.2, stratify=labels)
-    d_test, d_val = train_test_split(
-        d_test, test_size=0.5, stratify=[x.parent.stem for x in d_test]
-    )
-
-    print("\t:: Train Dataset Class Counts: ", Counter(x.parent.stem for x in d_train))
-    print("\t:: Test Dataset Class Counts: ", Counter(x.parent.stem for x in d_test))
-    print("\t:: Val Dataset Class Counts: ", Counter(x.parent.stem for x in d_val))
-    print("\t:: Total validation images", len(d_pred))
-    dataset_path=Path("data")
-    for path in ["train", "test", "val"]:
-        output_dir = dataset_path / path
-        print(f"\t:: Creating Directory {output_dir}")
-        output_dir.mkdir(parents=True, exist_ok=True)
-
-    print(":: Writing Datasets")
-    write_dataset(d_train, Path("data/train"))
-    write_dataset(d_test, Path("data/test"))
-    write_dataset(d_val, Path("data/val"))
-    #write_dataset(d_pred, "dataset" / "pred")
-
 if __name__ == "__main__":
-    generate_dataset()
     _ = IntelImgClfDataModule()

@@ -34,7 +34,7 @@ class LitResnet(pl.LightningModule):
         net: torch.nn.Module,
         optimizer: torch.optim.Optimizer,
         scheduler: torch.optim.lr_scheduler,
-        num_classes=10, 
+        num_classes=6, 
         lr=0.05,
     ):
         super().__init__()
