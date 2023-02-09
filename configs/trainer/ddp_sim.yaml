@@ -2,6 +2,6 @@ defaults:
   - default.yaml
 
 # simulate DDP on CPU, useful for debugging
-accelerator: gpu
+accelerator: cpu
 devices: 2
 strategy: ddp_spawn
