@@ -2,11 +2,7 @@ import torch
 from pytorch_lightning import LightningModule
 from torchmetrics import MaxMetric, MeanMetric
 from torchmetrics.classification.accuracy import Accuracy
-import json
-import os
-from datetime import datetime
-from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple, List
 
 import pytorch_lightning as pl
 import timm
@@ -29,8 +25,6 @@ from collections import Counter
 device = "cuda" if torch.cuda.is_available() else "cpu"
 accuracy = Accuracy(task="multiclass", num_classes=6).to(device)
 
-
-
 class LitResnet(pl.LightningModule):
     def __init__(
         self,
@@ -42,10 +36,26 @@ class LitResnet(pl.LightningModule):
     ):
         super().__init__()
 
-        self.save_hyperparameters()
+        self.save_hyperparameters(logger=False)
         self.model = timm.create_model(
             "resnet18", pretrained=True, num_classes=num_classes
         )
+
+        # loss function
+        self.criterion = torch.nn.CrossEntropyLoss()
+
+        # metric objects for calculating and averaging accuracy across batches
+        self.train_acc = Accuracy(task="multiclass", num_classes=6)
+        self.val_acc = Accuracy(task="multiclass", num_classes=6)
+        self.test_acc = Accuracy(task="multiclass", num_classes=6)
+
+        # for averaging loss across batches
+        self.train_loss = MeanMetric()
+        self.val_loss = MeanMetric()
+        self.test_loss = MeanMetric()
+
+        # for tracking best so far test accuracy
+        self.test_acc_best = MaxMetric()
 
     def forward(self, x):
         out = self.model(x)
