@@ -45,17 +45,17 @@ class LitResnet(pl.LightningModule):
         self.criterion = torch.nn.CrossEntropyLoss()
 
         # metric objects for calculating and averaging accuracy across batches
-        self.train_acc = Accuracy(task="multiclass", num_classes=6)
-        self.val_acc = Accuracy(task="multiclass", num_classes=6)
-        self.test_acc = Accuracy(task="multiclass", num_classes=6)
+        self.train_acc = Accuracy(task="multiclass", num_classes=10)
+        self.val_acc = Accuracy(task="multiclass", num_classes=10)
+        self.test_acc = Accuracy(task="multiclass", num_classes=10)
 
         # for averaging loss across batches
         self.train_loss = MeanMetric()
         self.val_loss = MeanMetric()
         self.test_loss = MeanMetric()
 
-        # for tracking best so far test accuracy
-        self.test_acc_best = MaxMetric()
+        # for tracking best so far validation accuracy
+        self.val_acc_best = MaxMetric()
 
     def forward(self, x):
         out = self.model(x)
@@ -86,41 +86,51 @@ class LitResnet(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         loss, preds, targets = self.model_step(batch)
-        x, y = batch
-        logits = self(x)
-        loss = F.nll_loss(logits, y)
-        preds = torch.argmax(logits, dim=1)
-        acc = accuracy(preds, y)
+
+        # update and log metrics
         self.train_loss(loss)
         self.train_acc(preds, targets)
         self.log("train/loss", self.train_loss, on_step=False, on_epoch=True, prog_bar=True)
         self.log("train/acc", self.train_acc, on_step=False, on_epoch=True, prog_bar=True)
-        #self.log(f"train/loss", loss, prog_bar=True)
-        #self.log(f"train/acc", acc, prog_bar=True)
-        return loss
+
+        # we can return here dict with any tensors
+        # and then read it in some callback or in `training_epoch_end()` below
+        # remember to always return loss from `training_step()` or backpropagation will fail!
+        return {"loss": loss, "preds": preds, "targets": targets}
 
     def validation_step(self, batch, batch_idx):
-        self.evaluate(batch, "val")
+        loss, preds, targets = self.model_step(batch)
+
+        # update and log metrics
+        self.val_loss(loss)
+        self.val_acc(preds, targets)
+        self.log("val/loss", self.val_loss, on_step=False, on_epoch=True, prog_bar=True)
+        self.log("val/acc", self.val_acc, on_step=False, on_epoch=True, prog_bar=True)
+
+        return {"loss": loss, "preds": preds, "targets": targets}
 
     def validation_epoch_end(self, outputs: List[Any]):
         acc = self.val_acc.compute()  # get current val acc
-        #self.val_acc_best(acc)  # update best so far val acc
+        self.val_acc_best(acc)  # update best so far val acc
         # log `val_acc_best` as a value through `.compute()` method, instead of as a metric object
         # otherwise metric would be reset by lightning after each epoch
-        #self.log("val/acc_best", self.val_acc_best.compute(), prog_bar=True)
+        self.log("val/acc_best", self.val_acc_best.compute(), prog_bar=True)
                 
 
     def test_step(self, batch, batch_idx):
         loss, preds, targets = self.model_step(batch)
-        #self.evaluate(batch, "test")
+
+        # update and log metrics
         self.test_loss(loss)
         self.test_acc(preds, targets)
         self.log("test/loss", self.test_loss, on_step=False, on_epoch=True, prog_bar=True)
         self.log("test/acc", self.test_acc, on_step=False, on_epoch=True, prog_bar=True)
-        #acc = self.test_acc.compute()  # get current val acc
-        #self.test_acc_best(acc)  # update best so far val acc
-        #self.log("test/acc_best", self.test_acc_best.compute(), prog_bar=True)
+
         return {"loss": loss, "preds": preds, "targets": targets}
+    
+    def test_epoch_end(self, outputs: List[Any]):
+        pass
+
     def configure_optimizers(self):
         # optimizer = torch.optim.SGD(
         #     self.parameters(),
