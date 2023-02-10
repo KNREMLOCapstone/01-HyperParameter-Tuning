@@ -26,7 +26,7 @@ import shutil
 from torchvision.datasets.utils import extract_archive
 from sklearn.model_selection import train_test_split
 from collections import Counter
-accuracy = Accuracy(task="multiclass", num_classes=6)
+accuracy = Accuracy(task="multiclass", num_classes=6).to(device)
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
