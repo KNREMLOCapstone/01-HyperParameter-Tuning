@@ -129,15 +129,19 @@ class LitResnet(pl.LightningModule):
         self.test_acc(preds, targets)
         self.log("test/loss", self.test_loss, on_step=False, on_epoch=True, prog_bar=True)
         self.log("test/acc", self.test_acc, on_step=False, on_epoch=True, prog_bar=True)
-
-        return {"loss": loss, "preds": preds, "targets": targets}
-    
-    def test_epoch_end(self, outputs: List[Any]):
         acc = self.test_acc.compute()  # get current val acc
         self.test_acc_best(acc)  # update best so far val acc
         # log `val_acc_best` as a value through `.compute()` method, instead of as a metric object
         # otherwise metric would be reset by lightning after each epoch
         self.log("test/acc_best", self.test_acc_best.compute(), prog_bar=True)
+        return {"loss": loss, "preds": preds, "targets": targets}
+    
+    def test_epoch_end(self, outputs: List[Any]):
+        #acc = self.test_acc.compute()  # get current val acc
+        #self.test_acc_best(acc)  # update best so far val acc
+        # log `val_acc_best` as a value through `.compute()` method, instead of as a metric object
+        # otherwise metric would be reset by lightning after each epoch
+        #self.log("test/acc_best", self.test_acc_best.compute(), prog_bar=True)
         pass
 
     def configure_optimizers(self):
