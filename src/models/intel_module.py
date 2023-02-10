@@ -37,8 +37,9 @@ class LitResnet(pl.LightningModule):
         super().__init__()
 
         self.save_hyperparameters(logger=False)
+        model_name=self.hparams.model,
         self.model = timm.create_model(
-            "resnet18", pretrained=True, num_classes=num_classes
+            model_name, pretrained=True, num_classes=num_classes
         )
 
         # loss function
@@ -55,7 +56,7 @@ class LitResnet(pl.LightningModule):
         self.test_loss = MeanMetric()
 
         # for tracking best so far validation accuracy
-        self.val_acc_best = MaxMetric()
+        #self.val_acc_best = MaxMetric()
 
         # for tracking best so far test accuracy
         self.test_acc_best = MaxMetric()
@@ -67,8 +68,9 @@ class LitResnet(pl.LightningModule):
     def on_train_start(self):
         # by default lightning executes validation step sanity checks before training starts,
         # so we need to make sure val_acc_best doesn't store accuracy from these checks
-        self.val_acc_best.reset()
+        #self.val_acc_best.reset()
         #self.test_acc_best.reset()
+        pass
     
     def model_step(self, batch: Any):
         x, y = batch
