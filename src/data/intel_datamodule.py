@@ -29,6 +29,8 @@ from torchvision.datasets.utils import extract_archive
 from sklearn.model_selection import train_test_split
 from collections import Counter
 
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
 def write_dataset(image_paths, output_dir):
     for img_path in image_paths:
         Path(output_dir / img_path.parent.stem).mkdir(parents=True, exist_ok=True)
