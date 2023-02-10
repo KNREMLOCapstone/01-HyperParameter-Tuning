@@ -78,6 +78,7 @@ class LitResnet(pl.LightningModule):
             self.log(f"{stage}/acc", acc, prog_bar=True)
 
     def training_step(self, batch, batch_idx):
+        loss, preds, targets = self.model_step(batch)
         x, y = batch
         logits = self(x)
         loss = F.nll_loss(logits, y)
