@@ -37,7 +37,6 @@ class LitResnet(pl.LightningModule):
         super().__init__()
 
         self.save_hyperparameters(logger=False)
-        model_name=self.hparams.model
         self.model = timm.create_model(
             "resnet18", pretrained=True, num_classes=num_classes
         )
