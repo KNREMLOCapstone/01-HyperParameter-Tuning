@@ -39,7 +39,7 @@ class LitResnet(pl.LightningModule):
         self.save_hyperparameters(logger=False)
         model_name=self.hparams.model
         self.model = timm.create_model(
-            "resnet18", pretrained=True, num_classes=num_classes
+            model_name, pretrained=True, num_classes=num_classes
         )
 
         # loss function
