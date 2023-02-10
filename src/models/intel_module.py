@@ -104,13 +104,18 @@ class LitResnet(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         self.evaluate(batch, "test")
-        self.val_loss(loss)
-        self.val_acc(preds, targets)
+        self.test_loss(loss)
+        self.test_acc(preds, targets)
         #self.log("val/loss", self.val_loss, on_step=False, on_epoch=True, prog_bar=True)
         #self.log("val/acc", self.val_acc, on_step=False, on_epoch=True, prog_bar=True)
         self.log("test/loss", self.test_loss, on_step=False, on_epoch=True, prog_bar=True)
         self.log("test/acc", self.test_acc, on_step=False, on_epoch=True, prog_bar=True)
-
+        acc = self.test_acc.compute()  # get current val acc
+        self.test_acc_best(acc)  # update best so far val acc
+        # log `val_acc_best` as a value through `.compute()` method, instead of as a metric object
+        # otherwise metric would be reset by lightning after each epoch
+        self.log("test/acc_best", self.test_acc_best.compute(), prog_bar=True)
+    
     def configure_optimizers(self):
         # optimizer = torch.optim.SGD(
         #     self.parameters(),
