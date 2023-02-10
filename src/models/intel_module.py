@@ -31,7 +31,7 @@ class LitResnet(pl.LightningModule):
         net: torch.nn.Module,
         optimizer: torch.optim.Optimizer,
         scheduler: torch.optim.lr_scheduler,
-        num_classes=6, 
+        num_classes=6,
         lr=0.05,
     ):
         super().__init__()
@@ -45,9 +45,9 @@ class LitResnet(pl.LightningModule):
         self.criterion = torch.nn.CrossEntropyLoss()
 
         # metric objects for calculating and averaging accuracy across batches
-        self.train_acc = Accuracy(task="multiclass", num_classes=10)
-        self.val_acc = Accuracy(task="multiclass", num_classes=10)
-        self.test_acc = Accuracy(task="multiclass", num_classes=10)
+        self.train_acc = Accuracy(task="multiclass", num_classes=6)
+        self.val_acc = Accuracy(task="multiclass", num_classes=6)
+        self.test_acc = Accuracy(task="multiclass", num_classes=6)
 
         # for averaging loss across batches
         self.train_loss = MeanMetric()
@@ -57,6 +57,9 @@ class LitResnet(pl.LightningModule):
         # for tracking best so far validation accuracy
         self.val_acc_best = MaxMetric()
 
+        # for tracking best so far test accuracy
+        self.test_acc_best = MaxMetric()
+    
     def forward(self, x):
         out = self.model(x)
         return F.log_softmax(out, dim=1)
@@ -65,6 +68,7 @@ class LitResnet(pl.LightningModule):
         # by default lightning executes validation step sanity checks before training starts,
         # so we need to make sure val_acc_best doesn't store accuracy from these checks
         self.val_acc_best.reset()
+        #self.test_acc_best.reset()
     
     def model_step(self, batch: Any):
         x, y = batch
@@ -129,6 +133,11 @@ class LitResnet(pl.LightningModule):
         return {"loss": loss, "preds": preds, "targets": targets}
     
     def test_epoch_end(self, outputs: List[Any]):
+        acc = self.test_acc.compute()  # get current val acc
+        self.test_acc_best(acc)  # update best so far val acc
+        # log `val_acc_best` as a value through `.compute()` method, instead of as a metric object
+        # otherwise metric would be reset by lightning after each epoch
+        self.log("test/acc_best", self.test_acc_best.compute(), prog_bar=True)
         pass
 
     def configure_optimizers(self):
