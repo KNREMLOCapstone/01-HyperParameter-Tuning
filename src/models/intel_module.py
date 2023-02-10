@@ -111,6 +111,7 @@ class LitResnet(pl.LightningModule):
                 
 
     def test_step(self, batch, batch_idx):
+        loss, preds, targets = self.model_step(batch)
         self.evaluate(batch, "test")
         self.test_loss(loss)
         self.test_acc(preds, targets)
