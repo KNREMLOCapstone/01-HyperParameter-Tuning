@@ -24,6 +24,9 @@ from sklearn.model_selection import train_test_split
 from collections import Counter
 device = "cuda" if torch.cuda.is_available() else "cpu"
 accuracy = Accuracy(task="multiclass", num_classes=6).to(device)
+precision=Precision(task='multiclass',average='macro',num_classes=6).to(device)
+recall = Recall(task="multiclass", average='macro', num_classes=6).to(device)
+confmat = ConfusionMatrix(task="multiclass", num_classes=6).to(device)
 
 class LitResnet(pl.LightningModule):
     def __init__(
@@ -83,11 +86,18 @@ class LitResnet(pl.LightningModule):
         logits = self(x)
         loss = F.nll_loss(logits, y)
         preds = torch.argmax(logits, dim=1)
-        acc = accuracy(preds, y)
+        acc = accuracy(preds, y)        
+        pre=precision(preds,y)        
+        rec=recall(preds, y)
+        conf=confmat(preds, y)
+
 
         if stage:
             self.log(f"{stage}/loss", loss, prog_bar=True)
             self.log(f"{stage}/acc", acc, prog_bar=True)
+            self.log(f"{stage}/pre", pre, prog_bar=True)
+            self.log(f"{stage}/rec", rec, prog_bar=True)
+            self.log(f"{stage}/conf", conf, prog_bar=True)
 
     def training_step(self, batch, batch_idx):
         loss, preds, targets = self.model_step(batch)
