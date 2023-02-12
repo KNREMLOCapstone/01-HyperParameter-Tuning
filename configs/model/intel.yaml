@@ -18,4 +18,5 @@ net:
   _target_: timm.create_model
   model_name: resnet18
   pretrained: True
-  num_classes: 10
+  num_classes: 6
+  
