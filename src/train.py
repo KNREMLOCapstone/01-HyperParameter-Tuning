@@ -2,6 +2,7 @@ from typing import List, Optional, Tuple
 
 import hydra
 import pyrootutils
+import torch
 import pytorch_lightning as pl
 from omegaconf import DictConfig
 from pytorch_lightning import Callback, LightningDataModule, LightningModule, Trainer
