@@ -37,9 +37,9 @@ class IntHandler:
 class LitResnet(pl.LightningModule):
     def __init__(
         self,
-        #net: torch.nn.Module,
-        #optimizer: torch.optim.Optimizer,
-        #scheduler: torch.optim.lr_scheduler,
+        net: torch.nn.Module,
+        optimizer: torch.optim.Optimizer,
+        scheduler: torch.optim.lr_scheduler,
         num_classes=6,
         lr=0.05,
     ):
@@ -230,5 +230,4 @@ class LitResnet(pl.LightningModule):
 
 
 if __name__ == "__main__":
-    #generate_dataset()
-    _ = LitResnet()
+    _ = LitResnet(None,None,None,)
