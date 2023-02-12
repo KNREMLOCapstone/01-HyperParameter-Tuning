@@ -230,4 +230,4 @@ class LitResnet(pl.LightningModule):
 
 
 if __name__ == "__main__":
-    _ = LitResnet(None,None,None,)
+    _ = LitResnet(None,None,None)
