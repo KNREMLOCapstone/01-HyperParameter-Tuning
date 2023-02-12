@@ -29,10 +29,6 @@ from src import utils
 
 log = utils.get_pylogger(__name__)
 
-#def save_scripted_model(model, output_dir):
-    #script = model.to_torchscript()
-    #torch.jit.save(script, output_dir / "model.scripted.pt")
-
 @utils.task_wrapper
 def train(cfg: DictConfig) -> Tuple[dict, dict]:
     """Trains the model. Can additionally evaluate on a testset, using best weights obtained during
@@ -85,6 +81,10 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
         trainer.fit(model=model, datamodule=datamodule, ckpt_path=cfg.get("ckpt_path"))
 
     train_metrics = trainer.callback_metrics
+    scripted_model = model.to_torchscript(method="script")
+    torch.jit.save(scripted_model, f"{cfg.paths.output_dir}/model.script.pt")
+
+    log.info(f"Saving traced model to {cfg.paths.output_dir}/model.script.pt")
 
     if cfg.get("test"):
         log.info("Starting testing!")
@@ -94,8 +94,6 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
             ckpt_path = None
         trainer.test(model=model, datamodule=datamodule, ckpt_path=ckpt_path)
         log.info(f"Best ckpt path: {ckpt_path}")
-        log.info(f"Scripted model path: {ckpt_path}")
-        torch.jit.save(model.to_torchscript(), ckpt_path / "model.scripted.pt")
 
 
     test_metrics = trainer.callback_metrics
