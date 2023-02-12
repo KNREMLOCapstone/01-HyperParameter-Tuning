@@ -87,7 +87,7 @@ class LitResnet(pl.LightningModule):
         # by default lightning executes validation step sanity checks before training starts,
         # so we need to make sure val_acc_best doesn't store accuracy from these checks
         #self.val_acc_best.reset()
-        self.test_acc_best.reset()
+        #self.test_acc_best.reset()
         pass
     
     def model_step(self, batch: Any):
