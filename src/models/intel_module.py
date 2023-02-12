@@ -76,8 +76,9 @@ class LitResnet(pl.LightningModule):
         self.test_acc_best = MaxMetric()
     
     def forward(self, x):
-        out = self.model(x)
-        return F.log_softmax(out, dim=1)
+        #out = self.model(x)
+        #return F.log_softmax(out, dim=1)
+        return self.net(x)
 
     def on_train_start(self):
         # by default lightning executes validation step sanity checks before training starts,
