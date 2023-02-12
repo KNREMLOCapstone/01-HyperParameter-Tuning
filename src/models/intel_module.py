@@ -14,6 +14,9 @@ from pytorch_lightning.callbacks import TQDMProgressBar
 from pytorch_lightning.plugins.environments import LightningEnvironment
 from torch.utils.data import DataLoader, Dataset
 from torchmetrics import Accuracy
+from torchmetrics import Precision
+from torchmetrics import Recall
+from torchmetrics import ConfusionMatrix
 from torchvision.datasets import ImageFolder
 
 import argparse
