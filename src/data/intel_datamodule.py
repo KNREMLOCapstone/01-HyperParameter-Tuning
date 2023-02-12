@@ -78,7 +78,7 @@ class IntelImgClfDataModule(LightningDataModule):
         self,
         data_dir: str = "data/",
         batch_size: int = 256,
-        num_workers: int = 0,
+        num_workers: int = 48,
         pin_memory: bool = False,
     ):
         super().__init__()
