@@ -142,49 +142,49 @@ class LitResnet(pl.LightningModule):
         self.log("val/recall", self.recall_score, on_step=False, on_epoch=True, prog_bar=False)
         return {"loss": loss, "preds": preds, "targets": targets}
 
-    # def validation_epoch_end(self, outputs: List[Any]):
-    #     #acc = self.val_acc.compute()  # get current val acc
-    #     #self.val_acc_best(acc)  # update best so far val acc
-    #     # log `val_acc_best` as a value through `.compute()` method, instead of as a metric object
-    #     # otherwise metric would be reset by lightning after each epoch
-    #     #self.log("val/acc_best", self.val_acc_best.compute(), prog_bar=True)
-    #     pass
+    def validation_epoch_end(self, outputs: List[Any]):
+        #acc = self.val_acc.compute()  # get current val acc
+        #self.val_acc_best(acc)  # update best so far val acc
+        # log `val_acc_best` as a value through `.compute()` method, instead of as a metric object
+        # otherwise metric would be reset by lightning after each epoch
+        #self.log("val/acc_best", self.val_acc_best.compute(), prog_bar=True)
+        pass
 
-    def validation_epoch_end(self, outs: List[Any]):
-        tb = self.logger.experiment  # noqa
+    #def validation_epoch_end(self, outs: List[Any]):
+        # tb = self.logger.experiment  # noqa
 
-        outputs = torch.cat([tmp['preds'] for tmp in outs])
-        labels = torch.cat([tmp['targets'] for tmp in outs])
+        # outputs = torch.cat([tmp['preds'] for tmp in outs])
+        # labels = torch.cat([tmp['targets'] for tmp in outs])
 
-        confusion = ConfusionMatrix(task="multiclass", num_classes=self.num_classes).to(device)
-        confusion(outputs, labels)
-        computed_confusion = confusion.compute().detach().cpu().numpy().astype(int)
+        # confusion = ConfusionMatrix(task="multiclass", num_classes=self.num_classes).to(device)
+        # confusion(outputs, labels)
+        # computed_confusion = confusion.compute().detach().cpu().numpy().astype(int)
 
-        # confusion matrix
-        df_cm = pd.DataFrame(
-            computed_confusion,
-            index=[0, 1, 2, 3, 4, 5],
-            columns=['buildings', 'forest', 'glacier', 'mountain', 'sea', 'street'],
-        )
+        # # confusion matrix
+        # df_cm = pd.DataFrame(
+        #     computed_confusion,
+        #     index=[0, 1, 2, 3, 4, 5],
+        #     columns=['buildings', 'forest', 'glacier', 'mountain', 'sea', 'street'],
+        # )
 
-        fig, ax = plt.subplots(figsize=(10, 5))
-        fig.subplots_adjust(left=0.05, right=.65)
-        sn.set(font_scale=1.2)
-        sn.heatmap(df_cm, annot=True, annot_kws={"size": 16}, fmt='d', ax=ax)
-        ax.legend(
-            [0, 1, 2, 3, 4, 5],
-            ['buildings', 'forest', 'glacier', 'mountain', 'sea', 'street'],
-            handler_map={int: IntHandler()},
-            loc='upper left',
-            bbox_to_anchor=(1.2, 1)
-        )
-        buf = io.BytesIO()
+        # fig, ax = plt.subplots(figsize=(10, 5))
+        # fig.subplots_adjust(left=0.05, right=.65)
+        # sn.set(font_scale=1.2)
+        # sn.heatmap(df_cm, annot=True, annot_kws={"size": 16}, fmt='d', ax=ax)
+        # ax.legend(
+        #     [0, 1, 2, 3, 4, 5],
+        #     ['buildings', 'forest', 'glacier', 'mountain', 'sea', 'street'],
+        #     handler_map={int: IntHandler()},
+        #     loc='upper left',
+        #     bbox_to_anchor=(1.2, 1)
+        # )
+        # buf = io.BytesIO()
 
-        plt.savefig(buf, format='jpeg', bbox_inches='tight')
-        buf.seek(0)
-        im = Image.open(buf)
-        im = torchvision.transforms.ToTensor()(im)
-        tb.add_image("val_confusion_matrix", im, global_step=self.current_epoch)
+        # plt.savefig(buf, format='jpeg', bbox_inches='tight')
+        # buf.seek(0)
+        # im = Image.open(buf)
+        # im = torchvision.transforms.ToTensor()(im)
+        # tb.add_image("val_confusion_matrix", im, global_step=self.current_epoch)
                 
 
     def test_step(self, batch, batch_idx):
