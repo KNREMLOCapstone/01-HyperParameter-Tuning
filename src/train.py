@@ -8,7 +8,12 @@ from omegaconf import DictConfig
 from pytorch_lightning import Callback, LightningDataModule, LightningModule, Trainer
 from pytorch_lightning.loggers import LightningLoggerBase
 
-pyrootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
+pyrootutils.setup_root(
+    search_from=__file__, 
+    indicator=[".git",".project-root"], 
+    pythonpath=True,
+    dotenv=True,
+)
 # ------------------------------------------------------------------------------------ #
 # the setup_root above is equivalent to:
 # - adding project root dir to PYTHONPATH
@@ -82,10 +87,11 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
         trainer.fit(model=model, datamodule=datamodule, ckpt_path=cfg.get("ckpt_path"))
 
     train_metrics = trainer.callback_metrics
-    scripted_model = model.to_torchscript(method="script")
-    torch.jit.save(scripted_model, f"{cfg.paths.output_dir}/model.script.pt")
+    
+    #scripted_model = model.to_torchscript(method="script")
+    #torch.jit.save(scripted_model, f"{cfg.paths.output_dir}/model.script.pt")
 
-    log.info(f"Saving traced model to {cfg.paths.output_dir}/model.script.pt")
+    #log.info(f"Saving traced model to {cfg.paths.output_dir}/model.script.pt")
 
     if cfg.get("test"):
         log.info("Starting testing!")
