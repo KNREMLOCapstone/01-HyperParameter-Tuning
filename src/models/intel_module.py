@@ -50,7 +50,10 @@ class LitResnet(pl.LightningModule):
         self.model = timm.create_model(
             "resnet18", pretrained=True, num_classes=num_classes
         )
-
+        self.net=net
+        self.lr=lr
+        self.optimizer=optimizer
+        self.scheduler=scheduler
         # loss function
         self.criterion = torch.nn.CrossEntropyLoss()
 
