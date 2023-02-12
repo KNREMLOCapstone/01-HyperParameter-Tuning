@@ -29,6 +29,9 @@ from src import utils
 
 log = utils.get_pylogger(__name__)
 
+#def save_scripted_model(model, output_dir):
+    #script = model.to_torchscript()
+    #torch.jit.save(script, output_dir / "model.scripted.pt")
 
 @utils.task_wrapper
 def train(cfg: DictConfig) -> Tuple[dict, dict]:
@@ -91,6 +94,9 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
             ckpt_path = None
         trainer.test(model=model, datamodule=datamodule, ckpt_path=ckpt_path)
         log.info(f"Best ckpt path: {ckpt_path}")
+        log.info(f"Scripted model path: {ckpt_path}")
+        torch.jit.save(model.to_torchscript(), ckpt_path / "model.scripted.pt")
+
 
     test_metrics = trainer.callback_metrics
 

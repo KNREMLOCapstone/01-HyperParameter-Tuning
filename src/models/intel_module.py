@@ -142,8 +142,8 @@ class LitResnet(pl.LightningModule):
         # update and log metrics
         self.test_loss(loss)
         self.test_acc(preds, targets)
-        self.log("test/loss", self.test_loss, on_step=False, on_epoch=True, prog_bar=True)
-        self.log("test/acc", self.test_acc, on_step=False, on_epoch=True, prog_bar=True)
+        #self.log("test/loss", self.test_loss, on_step=False, on_epoch=True, prog_bar=True)
+        #self.log("test/acc", self.test_acc, on_step=False, on_epoch=True, prog_bar=True)
         acc = self.test_acc.compute()  # get current val acc
         self.test_acc_best(acc)  # update best so far val acc
         # log `val_acc_best` as a value through `.compute()` method, instead of as a metric object
