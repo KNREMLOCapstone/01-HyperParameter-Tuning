@@ -48,7 +48,11 @@ class LitResnet(pl.LightningModule):
         self.num_classes = num_classes
         self.save_hyperparameters()        
         self.model = timm.create_model(
+<<<<<<< HEAD
             "resnet18", pretrained=True, num_classes=num_classes
+=======
+            "resnet34", pretrained=True, num_classes=num_classes
+>>>>>>> parent of ab98115... changed model to vit
         )
         self.net=net
         self.lr=lr
