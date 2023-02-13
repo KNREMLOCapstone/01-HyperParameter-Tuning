@@ -26,5 +26,10 @@ best_value: 0.9681627750396729
  ![image](https://user-images.githubusercontent.com/16095633/218397360-3770964d-6431-4b4c-b294-80cf9630b2a7.png)
 
  Since the vit_base model is consuming so much cuda memory, I went ahead with resnet18 for further steps. :(
+  
+  The hyper parameter tuning is based on the "test/best_acc". 
+  
+Training Tensorboard
+https://tensorboard.dev/experiment/NUAHg8TjRrG24guZ8033
 
  
